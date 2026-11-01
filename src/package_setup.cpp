@@ -216,7 +216,7 @@ int package_setup_auto(const fs::path& exe_dir, const fs::path& assets, uint32_t
   for (; !ec && it != fs::recursive_directory_iterator(); it.increment(ec)) {
     const auto& e = *it;
     if (e.is_directory(ec)) {
-      if (it.depth() >= 3 || e.path() == assets) it.disable_recursion_pending();
+      if (it.depth() >= 6 || e.path() == assets) it.disable_recursion_pending();
       continue;
     }
     if (!e.is_regular_file(ec) || e.file_size(ec) < 0x2000) continue;

@@ -8437,6 +8437,7 @@ void lode_runner_RegisterFunctions(rex::runtime::IModuleRegistrar* registrar) {
   registrar->SetFunction(0x822C9BA0, sub_822C9BA0);
   registrar->SetFunction(0x822C9BD0, sub_822C9BD0);
   registrar->SetFunction(0x822C9C60, sub_822C9C60);
+  registrar->SetFunction(0x822C9D78, sub_822C9D78);
   registrar->SetFunction(0x822C9D90, sub_822C9D90);
   registrar->SetFunction(0x822C9E00, sub_822C9E00);
   registrar->SetFunction(0x822C9E28, sub_822C9E28);
@@ -12758,6 +12759,7 @@ void lode_runner_RegisterFunctions(rex::runtime::IModuleRegistrar* registrar) {
   registrar->SetFunction(0x824B9AA0, sub_824B9AA0);
   registrar->SetFunction(0x824B9AA8, sub_824B9AA8);
   registrar->SetFunction(0x824B9AB0, sub_824B9AB0);
+  registrar->SetFunction(0x824B9AB8, sub_824B9AB8);
   registrar->SetFunction(0x824B9AC0, sub_824B9AC0);
   registrar->SetFunction(0x824B9AC8, sub_824B9AC8);
   registrar->SetFunction(0x824B9AD0, sub_824B9AD0);

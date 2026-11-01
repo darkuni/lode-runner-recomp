@@ -59819,6 +59819,15 @@ DEFINE_REX_FUNC(sub_824B9AB0) {
 	return;
 }
 
+DEFINE_REX_FUNC(sub_824B9AB8) {
+	REX_FUNC_PROLOGUE();
+	// mr r3,r5
+	ctx.r3.u64 = ctx.r5.u64;
+	// b 0x824d4fe0
+	sub_824D4FE0(ctx, base);
+	return;
+}
+
 DEFINE_REX_FUNC(sub_824B9AC0) {
 	REX_FUNC_PROLOGUE();
 	// mr r3,r5

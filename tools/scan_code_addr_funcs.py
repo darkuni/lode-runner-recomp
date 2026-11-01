@@ -26,7 +26,7 @@ for lo, hi in text:
         if (i >> 26) != 15 or ((i >> 16) & 31) != 0:   # lis rD,imm  (addis rD,0,imm)
             continue
         rd = (i >> 21) & 31; hi16 = i & 0xFFFF
-        for k in range(1, 9):
+        for k in range(1, 33):
             j = w(a + 4 * k); op = j >> 26
             if op in (14, 24) and ((j >> 16) & 31) == rd:   # addi / ori rY, rD, lo
                 lo16 = j & 0xFFFF
@@ -39,7 +39,9 @@ for lo, hi in text:
                 if (in_text(v) and v % 4 == 0 and v not in funcs and v not in labels and term(w(v - 4))
                         and w(v) != 0 and not is_table):
                     found.add(v)
-                break
+                if ((j >> 21) & 31) == rd:   # addi rD,rD,lo: the base is gone
+                    break
+                continue
             if ((j >> 21) & 31) == rd and op not in (36, 37, 38, 44, 45, 47, 54, 55):  # rD overwritten
                 break
 print('# %d code-built addresses of unregistered function starts' % len(found), file=sys.stderr)
