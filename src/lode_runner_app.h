@@ -26,6 +26,8 @@ void InstallCrashHandler();  // src/crash_handler.cpp
 #include "game_menu.h"
 #include "package_setup.h"
 
+REXCVAR_DEFINE_INT32(lode_runner_keys_version, 0, "Recomp", "Default key layout version applied");
+
 class LodeRunnerApp : public rex::ReXApp {
  public:
   using rex::ReXApp::ReXApp;
@@ -89,6 +91,13 @@ class LodeRunnerApp : public rex::ReXApp {
       rex::cvar::SetFlagByName("audio_maxqframes",
                                std::to_string(recomp_ui::game_keys::kDefaultAudioFrames));
       rex::cvar::SetFlagByName("recomp_defaults_version", "2");
+      if (!config_path_.empty()) rex::cvar::SaveConfig(config_path_);
+    }
+    // v1.0.1: Z / X are dig left / dig right (A / B). Re-apply the default key
+    // layout once over settings written by v1.0.0.
+    if (rex::cvar::Query<int32_t>("lode_runner_keys_version") < 1) {
+      recomp_ui::GameMenu::ApplyDefaultKeys();
+      rex::cvar::SetFlagByName("lode_runner_keys_version", "1");
       if (!config_path_.empty()) rex::cvar::SaveConfig(config_path_);
     }
     // Steam Deck (Steam sets SteamDeck=1, also under Proton): texture
