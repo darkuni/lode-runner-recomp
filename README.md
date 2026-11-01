@@ -17,7 +17,7 @@ stock SDK from `darkuni/rexglue-sdk-builds`. Run it by hand with `release_tag` s
 `lode_runner_manifest.toml` + `lode_runner_overrides.toml` -> `generated/`:
 - 8 shared `li r3,1; blr` tails that the next function branches into, plus 1 branch-only thunk
 - 79 functions reachable only through data pointers (`tools/scan_pointer_funcs.py`; import stubs excluded)
-- 14 functions whose address is built in code (`tools/scan_code_addr_funcs.py`)
+- 12 functions whose address is built in code (`tools/scan_code_addr_funcs.py`)
 
 Known latent spot (same as After Burner Climax): one shared engine routine around 0x822F21C0 has
 cross-function branches that end in a fatal error if ever taken.

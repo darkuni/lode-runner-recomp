@@ -17376,8 +17376,8 @@ void lode_runner_RegisterFunctions(rex::runtime::IModuleRegistrar* registrar) {
   registrar->SetFunction(0x8258B2E4, __imp__ObDereferenceObject);
   registrar->SetFunction(0x8258B2F4, __imp__KeSetBasePriorityThread);
   registrar->SetFunction(0x8258B304, __imp__ObReferenceObjectByHandle);
-  registrar->SetFunction(0x8258B314, sub_8258B314);
-  registrar->SetFunction(0x8258B324, sub_8258B324);
+  registrar->SetFunction(0x8258B314, __imp__KeTlsGetValue);
+  registrar->SetFunction(0x8258B324, __imp__KeTlsSetValue);
   registrar->SetFunction(0x8258B334, __imp__KeTlsAlloc);
   registrar->SetFunction(0x8258B344, __imp__KeTlsFree);
   registrar->SetFunction(0x8258B354, __imp__RtlTimeToTimeFields);

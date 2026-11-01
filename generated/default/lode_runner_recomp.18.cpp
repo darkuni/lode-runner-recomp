@@ -7824,7 +7824,7 @@ DEFINE_REX_FUNC(sub_82300EF0) {
 	// mr r3,r11
 	ctx.r3.u64 = ctx.r11.u64;
 	// b 0x8258b314
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	return;
 }
 
@@ -7999,7 +7999,7 @@ loc_82300FCC:
 loc_82300FEC:
 	// bl 0x8258b314
 	ctx.lr = 0x82300FF0;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// mr. r31,r3
 	ctx.r31.u64 = ctx.r3.u64;
 	ctx.cr0.compare<int32_t>(ctx.r31.s32, 0, ctx.xer);
@@ -8039,7 +8039,7 @@ loc_82301018:
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r29.u32 + 27584);
 	// bl 0x8258b324
 	ctx.lr = 0x82301034;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 loc_82301034:
 	// lwz r11,20(r31)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r31.u32 + 20);
@@ -8218,7 +8218,7 @@ loc_823010F8:
 	if (ctx.cr6.eq) goto loc_82301144;
 	// bl 0x8258b314
 	ctx.lr = 0x82301114;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// cmplwi r3,0
 	ctx.cr0.compare<uint32_t>(ctx.r3.u32, 0, ctx.xer);
 	// beq 0x82301140
@@ -8244,7 +8244,7 @@ loc_823010F8:
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r31.u32 + 27584);
 	// bl 0x8258b324
 	ctx.lr = 0x82301140;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 loc_82301140:
 	// lwz r3,27584(r31)
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r31.u32 + 27584);

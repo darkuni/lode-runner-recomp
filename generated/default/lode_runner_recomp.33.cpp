@@ -22595,7 +22595,7 @@ DEFINE_REX_FUNC(sub_824C96B8) {
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r31.u32 + -16760);
 	// bl 0x8258b314
 	ctx.lr = 0x824C96DC;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// cmpwi cr6,r30,0
 	ctx.cr6.compare<int32_t>(ctx.r30.s32, 0, ctx.xer);
 	// addi r4,r3,1
@@ -22609,7 +22609,7 @@ loc_824C96EC:
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r31.u32 + -16760);
 	// bl 0x8258b324
 	ctx.lr = 0x824C96F4;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 	// addi r1,r1,112
 	ctx.r1.s64 = ctx.r1.s64 + 112;
 	// lwz r12,-8(r1)
@@ -22642,7 +22642,7 @@ DEFINE_REX_FUNC(sub_824C9710) {
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r11.u32 + -16760);
 	// bl 0x8258b314
 	ctx.lr = 0x824C9728;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// subfic r11,r3,0
 	ctx.xer.ca = ctx.r3.u32 <= 0;
 	ctx.r11.u64 = static_cast<uint64_t>(0) - ctx.r3.u64;
@@ -33118,7 +33118,7 @@ loc_824CDB20:
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r31.u32 + -16760);
 	// bl 0x8258b314
 	ctx.lr = 0x824CDB2C;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// lwz r11,-16760(r31)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r31.u32 + -16760);
 	// addi r4,r3,1
@@ -33127,7 +33127,7 @@ loc_824CDB20:
 	ctx.r3.u64 = ctx.r11.u64;
 	// bl 0x8258b324
 	ctx.lr = 0x824CDB3C;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 	// addi r4,r1,100
 	ctx.r4.s64 = ctx.r1.s64 + 100;
 	// mr r3,r29
@@ -33155,7 +33155,7 @@ loc_824CDB20:
 loc_824CDB68:
 	// bl 0x8258b314
 	ctx.lr = 0x824CDB6C;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// lwz r11,-16760(r31)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r31.u32 + -16760);
 	// addi r4,r3,-1
@@ -33164,7 +33164,7 @@ loc_824CDB68:
 	ctx.r3.u64 = ctx.r11.u64;
 	// bl 0x8258b324
 	ctx.lr = 0x824CDB7C;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 	// b 0x824cdc64
 	goto loc_824CDC64;
 loc_824CDB80:
@@ -33189,7 +33189,7 @@ loc_824CDB80:
 	if (ctx.cr0.lt) goto loc_824CDB68;
 	// bl 0x8258b314
 	ctx.lr = 0x824CDBA4;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// lwz r11,-16760(r31)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r31.u32 + -16760);
 	// addi r4,r3,-1
@@ -33198,7 +33198,7 @@ loc_824CDB80:
 	ctx.r3.u64 = ctx.r11.u64;
 	// bl 0x8258b324
 	ctx.lr = 0x824CDBB4;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 	// li r3,72
 	ctx.r3.s64 = 72;
 	// bl 0x824c8ad0
@@ -33424,7 +33424,7 @@ loc_824CDD18:
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r24.u32 + -16760);
 	// bl 0x8258b314
 	ctx.lr = 0x824CDD2C;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// lwz r11,-16760(r24)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r24.u32 + -16760);
 	// addi r4,r3,1
@@ -33433,7 +33433,7 @@ loc_824CDD18:
 	ctx.r3.u64 = ctx.r11.u64;
 	// bl 0x8258b324
 	ctx.lr = 0x824CDD3C;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 	// li r11,1
 	ctx.r11.s64 = 1;
 	// li r9,0
@@ -33465,7 +33465,7 @@ loc_824CDD18:
 	ctx.r3.u64 = ctx.r11.u64;
 	// bl 0x8258b314
 	ctx.lr = 0x824CDD78;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// lwz r11,-16760(r24)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r24.u32 + -16760);
 	// addi r4,r3,-1
@@ -33474,7 +33474,7 @@ loc_824CDD18:
 	ctx.r3.u64 = ctx.r11.u64;
 	// bl 0x8258b324
 	ctx.lr = 0x824CDD88;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 	// cmpwi cr6,r31,0
 	ctx.cr6.compare<int32_t>(ctx.r31.s32, 0, ctx.xer);
 	// bge cr6,0x824cdd98
@@ -34001,7 +34001,7 @@ loc_824CE100:
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r29.u32 + -16760);
 	// bl 0x8258b314
 	ctx.lr = 0x824CE10C;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// lwz r11,-16760(r29)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r29.u32 + -16760);
 	// addi r4,r3,1
@@ -34010,7 +34010,7 @@ loc_824CE100:
 	ctx.r3.u64 = ctx.r11.u64;
 	// bl 0x8258b324
 	ctx.lr = 0x824CE11C;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 	// mr r3,r31
 	ctx.r3.u64 = ctx.r31.u64;
 	// bl 0x824c9838
@@ -34027,7 +34027,7 @@ loc_824CE100:
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r29.u32 + -16760);
 	// bl 0x8258b314
 	ctx.lr = 0x824CE138;
-	sub_8258B314(ctx, base);
+	__imp__KeTlsGetValue(ctx, base);
 	// lwz r11,-16760(r29)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r29.u32 + -16760);
 	// addi r4,r3,-1
@@ -34036,7 +34036,7 @@ loc_824CE100:
 	ctx.r3.u64 = ctx.r11.u64;
 	// bl 0x8258b324
 	ctx.lr = 0x824CE148;
-	sub_8258B324(ctx, base);
+	__imp__KeTlsSetValue(ctx, base);
 	// mr r4,r26
 	ctx.r4.u64 = ctx.r26.u64;
 	// mr r3,r31
