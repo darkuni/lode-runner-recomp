@@ -19,6 +19,10 @@ stock SDK from `darkuni/rexglue-sdk-builds`. Run it by hand with `release_tag` s
 - 79 functions reachable only through data pointers (`tools/scan_pointer_funcs.py`; import stubs excluded)
 - 14 functions whose address is built in code (`tools/scan_code_addr_funcs.py`, which now follows every addi from a lis base)
 
+- `setjmp_address` / `longjmp_address` in the manifest (CRT setjmp 0x82548E50, longjmp 0x82548A10):
+  the game's JPEG loader (libjpeg) reports errors with longjmp, so these must be real host
+  setjmp/longjmp or the stack is left corrupted (crash with r31 == 0 after the Microsoft logo)
+
 Known latent spot (same as After Burner Climax): one shared engine routine around 0x822F21C0 has
 cross-function branches that end in a fatal error if ever taken.
 

@@ -40599,7 +40599,7 @@ DEFINE_REX_FUNC(sub_822B1CF0) {
 	ctx.r3.s64 = ctx.r11.s64 + 144;
 	// bl 0x82548a10
 	ctx.lr = 0x822B1D24;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 }
 
 DEFINE_REX_FUNC(sub_822B1D28) {
@@ -40737,7 +40737,7 @@ DEFINE_REX_FUNC(sub_822B1DF8) {
 	// li r4,1
 	ctx.r4.s64 = 1;
 	// b 0x82548a10
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 	return;
 }
 
@@ -45016,6 +45016,8 @@ loc_822B3BD4:
 
 DEFINE_REX_FUNC(sub_822B3BE0) {
 	REX_FUNC_PROLOGUE();
+	PPCContext env{};
+	PPCRegister temp{};
 	uint32_t ea{};
 	// mflr r12
 	ctx.r12.u64 = ctx.lr;
@@ -45063,7 +45065,10 @@ DEFINE_REX_FUNC(sub_822B3BE0) {
 	REX_STORE_U32(ctx.r1.u32 + 584, ctx.r10.u32);
 	// bl 0x82548e50
 	ctx.lr = 0x822B3C34;
-	sub_82548E50(ctx, base);
+	env = ctx;
+	temp.s64 = ppc_setjmp(ctx.r3.u32);
+	if (temp.s64 != 0) ctx = env;
+	ctx.r3 = temp;
 	// cmpwi r3,0
 	ctx.cr0.compare<int32_t>(ctx.r3.s32, 0, ctx.xer);
 	// bne 0x822b3d10
@@ -46881,6 +46886,8 @@ loc_822B4908:
 
 DEFINE_REX_FUNC(sub_822B4918) {
 	REX_FUNC_PROLOGUE();
+	PPCContext env{};
+	PPCRegister temp{};
 	uint32_t ea{};
 	// mflr r12
 	ctx.r12.u64 = ctx.lr;
@@ -46966,7 +46973,10 @@ loc_822B4968:
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r1.u32 + 96);
 	// bl 0x82548e50
 	ctx.lr = 0x822B49B0;
-	sub_82548E50(ctx, base);
+	env = ctx;
+	temp.s64 = ppc_setjmp(ctx.r3.u32);
+	if (temp.s64 != 0) ctx = env;
+	ctx.r3 = temp;
 	// cmpwi r3,0
 	ctx.cr0.compare<int32_t>(ctx.r3.s32, 0, ctx.xer);
 	// bne 0x822b4d00

@@ -9,3 +9,7 @@ game_root = "assets"
 file_path = "assets/default.xex"
 out_directory_path = "generated/default"
 includes = ["lode_runner_overrides.toml"]
+# CRT setjmp/longjmp (libjpeg's error handling uses them): emitted as host
+# setjmp/longjmp so the host stack unwinds with the guest one.
+setjmp_address = 0x82548E50
+longjmp_address = 0x82548A10

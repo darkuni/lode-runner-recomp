@@ -9276,7 +9276,7 @@ loc_82484984:
 	REX_STORE_U32(ctx.r11.u32 + 1364, ctx.r10.u32);
 	// bl 0x82548a10
 	ctx.lr = 0x8248499C;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 loc_8248499C:
 	// lwz r11,0(r30)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r30.u32 + 0);
@@ -9290,7 +9290,7 @@ loc_8248499C:
 	REX_STORE_U32(ctx.r11.u32 + 1364, ctx.r10.u32);
 	// bl 0x82548a10
 	ctx.lr = 0x824849B4;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 loc_824849B4:
 	// lwz r11,0(r30)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r30.u32 + 0);
@@ -9304,7 +9304,7 @@ loc_824849B4:
 	REX_STORE_U32(ctx.r11.u32 + 1364, ctx.r10.u32);
 	// bl 0x82548a10
 	ctx.lr = 0x824849CC;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 loc_824849CC:
 	// lwz r3,64(r30)
 	ctx.r3.u64 = REX_LOAD_U32(ctx.r30.u32 + 64);
@@ -24148,7 +24148,7 @@ loc_8248B010:
 	ctx.r3.s64 = ctx.r6.s64 + 16;
 	// bl 0x82548a10
 	ctx.lr = 0x8248B050;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 loc_8248B050:
 	// add r4,r28,r31
 	ctx.r4.u64 = ctx.r28.u64 + ctx.r31.u64;
@@ -24882,7 +24882,7 @@ loc_8248B524:
 	// addi r3,r10,16
 	ctx.r3.s64 = ctx.r10.s64 + 16;
 	// b 0x82548a10
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 	return;
 }
 
@@ -54931,7 +54931,7 @@ loc_82498350:
 	REX_STORE_U32(ctx.r11.u32 + 1364, ctx.r10.u32);
 	// bl 0x82548a10
 	ctx.lr = 0x82498370;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 }
 
 DEFINE_REX_FUNC(sub_82498370) {
@@ -55959,7 +55959,7 @@ loc_82498A80:
 	REX_STORE_U32(ctx.r11.u32 + 1364, ctx.r10.u32);
 	// bl 0x82548a10
 	ctx.lr = 0x82498A98;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 loc_82498A98:
 	// cmpwi cr6,r9,4
 	ctx.cr6.compare<int32_t>(ctx.r9.s32, 4, ctx.xer);
@@ -61939,7 +61939,7 @@ DEFINE_REX_FUNC(sub_8249AEE8) {
 	ctx.r3.s64 = ctx.r31.s64 + 16;
 	// bl 0x82548a10
 	ctx.lr = 0x8249AF60;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 loc_8249AF60:
 	// lwz r11,1360(r31)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r31.u32 + 1360);
@@ -61959,7 +61959,7 @@ loc_8249AF60:
 	ctx.r3.s64 = ctx.r31.s64 + 16;
 	// bl 0x82548a10
 	ctx.lr = 0x8249AF84;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 loc_8249AF84:
 	// lwz r11,1360(r31)
 	ctx.r11.u64 = REX_LOAD_U32(ctx.r31.u32 + 1360);
@@ -61979,7 +61979,7 @@ loc_8249AF84:
 	ctx.r3.s64 = ctx.r31.s64 + 16;
 	// bl 0x82548a10
 	ctx.lr = 0x8249AFA8;
-	sub_82548A10(ctx, base);
+	ppc_longjmp(ctx.r3.u32, ctx.r4.s32);
 loc_8249AFA8:
 	// lwz r29,1452(r31)
 	ctx.r29.u64 = REX_LOAD_U32(ctx.r31.u32 + 1452);
