@@ -16,6 +16,7 @@ set(LODERUNNER_SOURCES
     src/game_menu.cpp
     src/crash_handler.cpp
     src/package_setup.cpp
+    src/diag_trace.cpp
 )
 
 if(WIN32)
