@@ -13,9 +13,14 @@ on:
         required: false
         default: ""
       release_tag:
-        description: "Publish a prerelease with this tag (e.g. v1.0.0-rc1)"
+        description: "Publish a release with this tag (e.g. v1.0.0)"
         required: false
         default: ""
+      prerelease:
+        description: "Mark it as a prerelease"
+        type: boolean
+        required: false
+        default: true
 
 env:
   REXGLUE_SDK_REF: v0.9.0
@@ -197,11 +202,13 @@ jobs:
           $zip = "lode_runner-$tag-win-amd64.zip"
           Compress-Archive -Path dist\* -DestinationPath $zip -Force
           # A release published from the GitHub page already exists: attach the zip to it.
-          # Otherwise (tag pushed, or release_tag input) create a prerelease as before.
+          # Otherwise (tag pushed, or release_tag input) create one; prerelease unless the input says not to.
           gh release view $tag --repo ${{ github.repository }} *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag $zip --clobber --repo ${{ github.repository }}
           } else {
-            gh release create $tag $zip --repo ${{ github.repository }} --target ${{ github.sha }} --prerelease --title "Lode Runner $tag" --notes-file RELEASE_NOTES.md
+            $pre = @()
+            if ("${{ inputs.prerelease }}" -ne "false") { $pre = @("--prerelease") }
+            gh release create $tag $zip --repo ${{ github.repository }} --target ${{ github.sha }} @pre --title "Lode Runner $tag" --notes-file RELEASE_NOTES.md
           }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
