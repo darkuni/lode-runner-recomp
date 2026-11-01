@@ -1,4 +1,4 @@
-# Lode Runner Recompiled (private)
+# Lode Runner Recompiled
 
 Static recompilation of **Lode Runner** (Xbox 360 XBLA, Tozai Games / Southend Interactive, 2009;
 Title ID 5841085B, default.xex 0.0.1.2 built 2009-02-24, 6,205,440 bytes, SHA-1 `3d0c8354…`) to native
@@ -8,6 +8,11 @@ Poker Smash / After Burner Climax / OutRun recomps.
 **No game data is included.** Put your own Lode Runner XBLA package (the LIVE file, or the `5841085B`
 folder from the console) next to `lode_runner.exe` and run it: the first start builds the `assets` folder.
 Other versions of `default.xex` are refused with a message naming the supported one.
+
+## Download
+Get the latest `lode_runner-<version>-win-amd64.zip` from [Releases](https://github.com/darkuni/lode-runner-recomp/releases),
+unzip it, put your package next to `lode_runner.exe` and run it. Requirements: 64-bit Windows 10/11 and the
+[Microsoft Visual C++ Redistributable 2015-2022 (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe).
 
 ## Building
 GitHub Actions (`.github/workflows/build-windows.yml`) builds on every push to `main` against the prebuilt
@@ -27,6 +32,9 @@ Known latent spot (same as After Burner Climax): one shared engine routine aroun
 cross-function branches that end in a fatal error if ever taken.
 
 ## In-game settings (F1 or Esc)
+Keyboard: arrows move (D-pad and stick), Z = dig left (A), X = dig right (B), A / S = X / Y, C / V = triggers,
+Q / W = bumpers, Enter = Start, Backspace = Back. Controllers work as-is.
+
 Display mode (also F11), window size, render resolution, VSync, aspect ratio, texture filtering, audio
 buffer, keyboard on/off, per-button key rebinding, quit. F3 = performance overlay. Runs as the full game.
 Crash reports: `crash-*.txt` + `.dmp` next to the exe; `lode_runner.map` decodes them.
