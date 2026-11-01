@@ -1,0 +1,113 @@
+# Manual codegen overrides for Lode Runner (XBLA 5841085B)
+
+[functions]
+# Shared "return 1" tails (li r3,1; blr) branched into from the next function
+0x82114488 = {}
+0x821E0C90 = {}
+0x821E0F88 = {}
+0x82230EE8 = {}
+0x8223A8A0 = {}
+0x8223C910 = {}
+0x8225D4E8 = {}
+0x8225EB30 = {}
+# Branch-only target the analyzer missed
+0x8251D3E0 = {}
+
+# Functions only reachable through data pointers (vtables/callbacks, SEH funclets):
+# no bl caller and no .pdata entry. Found by scan_pointer_funcs.py (import stubs excluded).
+0x820FFBB0 = {}
+0x82107D50 = {}
+0x82114478 = {}
+0x821E0C80 = {}
+0x821E0F78 = {}
+0x821EB758 = {}
+0x821F0390 = {}
+0x821FF668 = {}
+0x82203198 = {}
+0x82203240 = {}
+0x8220BAC0 = {}
+0x8220BAE0 = {}
+0x8220BF38 = {}
+0x8220CF28 = {}
+0x82225530 = {}
+0x8222DA18 = {}
+0x8222DE98 = {}
+0x8222EB08 = {}
+0x82230ED8 = {}
+0x82232898 = {}
+0x82233CD0 = {}
+0x82235520 = {}
+0x82236ED0 = {}
+0x822381E8 = {}
+0x82238EE8 = {}
+0x82239B38 = {}
+0x8223A890 = {}
+0x8223BB70 = {}
+0x8223C900 = {}
+0x8223DEA0 = {}
+0x8223EBF8 = {}
+0x8223EC40 = {}
+0x82240AF0 = {}
+0x8225D4D8 = {}
+0x8225EB20 = {}
+0x82264DF0 = {}
+0x822F23B4 = {}
+0x8230D380 = {}
+0x8230D390 = {}
+0x8230D498 = {}
+0x8230D4C0 = {}
+0x8230D4E8 = {}
+0x8230D510 = {}
+0x8230D940 = {}
+0x82398440 = {}
+0x8239A758 = {}
+0x8239A794 = {}
+0x8239B1D0 = {}
+0x8239B330 = {}
+0x823B504C = {}
+0x82462FA8 = {}
+0x82462FF8 = {}
+0x8249CD80 = {}
+0x824B1BC8 = {}
+0x824B3344 = {}
+0x824B34BC = {}
+0x824F5478 = {}
+0x824F7590 = {}
+0x825182C8 = {}
+0x82524168 = {}
+0x8254BF68 = {}
+0x8254C0E0 = {}
+0x8254C454 = {}
+0x8254C594 = {}
+0x8254CC74 = {}
+0x82556F20 = {}
+0x82565198 = {}
+0x8256D608 = {}
+0x8256F828 = {}
+0x8256F830 = {}
+0x8256F838 = {}
+0x8256F840 = {}
+0x8256F850 = {}
+0x8256F858 = {}
+0x8256F878 = {}
+0x8256F880 = {}
+0x8256F890 = {}
+0x82571E28 = {}
+0x82571E70 = {}
+
+# Functions whose address is built in code (lis+addi), jump-table bases excluded.
+# Found by scan_code_addr_funcs.py.
+0x8230D960 = {}
+0x8230D970 = {}
+0x8230D980 = {}
+0x8230D990 = {}
+0x8230D9A0 = {}
+0x8230D9B0 = {}
+0x8230D9C0 = {}
+0x8230D9D0 = {}
+0x8230D9E0 = {}
+0x8230D9F0 = {}
+0x823E3868 = {}
+0x824B9BB0 = {}
+0x8258B314 = {}
+0x8258B324 = {}

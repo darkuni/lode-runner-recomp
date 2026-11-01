@@ -1,0 +1,207 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      sdk_pkg:
+        description: "SDK package override (e.g. v0.9.0 for stock, for A/B tests)"
+        required: false
+        default: ""
+      release_tag:
+        description: "Publish a prerelease with this tag (e.g. v1.0.0-rc1)"
+        required: false
+        default: ""
+
+env:
+  REXGLUE_SDK_REF: v0.9.0
+  # Prebuilt package from darkuni/rexglue-sdk-builds: stock ReXGlue v0.9.0 (the
+  # patched XMA builds are OutRun-only).
+  REXGLUE_SDK_PKG: ${{ inputs.sdk_pkg != '' && inputs.sdk_pkg || 'v0.9.0' }}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 240
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install LLVM (clang 20+) and Ninja
+        shell: pwsh
+        run: |
+          choco install llvm ninja -y --no-progress
+          "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+      
+      - name: MSVC environment (headers/libs for clang)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Toolchain versions
+        shell: pwsh
+        run: |
+          clang++ --version
+          cmake --version
+          ninja --version
+
+      # ---------- ReXGlue SDK ----------
+      # 1) Prebuilt package from darkuni/rexglue-sdk-builds (fast path).
+      # 2) Fallback: this repo's cache, else compile the SDK here.
+      - name: Download prebuilt SDK
+        id: sdk-prebuilt
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $url = "https://github.com/darkuni/rexglue-sdk-builds/releases/download/sdk-$env:REXGLUE_SDK_PKG/rexglue-sdk-$env:REXGLUE_SDK_PKG-win-amd64-release.zip"
+          Invoke-WebRequest -Uri $url -OutFile sdk.zip
+          Expand-Archive sdk.zip -DestinationPath rexglue-sdk-install
+          Get-Content rexglue-sdk-install\BUILD_INFO.txt
+          "ok=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Restore SDK install cache
+        id: sdk-cache
+        if: steps.sdk-prebuilt.outputs.ok != 'true'
+        uses: actions/cache@v4
+        with:
+          path: rexglue-sdk-install
+          key: rexglue-sdk-${{ env.REXGLUE_SDK_PKG }}-win-amd64
+
+      - name: Keep LF line endings (SDK patches are LF)
+        if: steps.sdk-prebuilt.outputs.ok != 'true' && steps.sdk-cache.outputs.cache-matched-key == ''
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - name: Checkout ReXGlue SDK
+        if: steps.sdk-prebuilt.outputs.ok != 'true' && steps.sdk-cache.outputs.cache-matched-key == ''
+        uses: actions/checkout@v4
+        with:
+          repository: rexglue/rexglue-sdk
+          ref: ${{ env.REXGLUE_SDK_REF }}
+          path: rexglue-sdk
+          submodules: recursive
+
+      - name: Checkout SDK patches
+        if: steps.sdk-prebuilt.outputs.ok != 'true' && steps.sdk-cache.outputs.cache-matched-key == '' && env.REXGLUE_SDK_PKG != env.REXGLUE_SDK_REF
+        uses: actions/checkout@v4
+        with:
+          repository: darkuni/rexglue-sdk-builds
+          path: sdk-builds
+
+      - name: Build and install SDK
+        if: steps.sdk-prebuilt.outputs.ok != 'true' && steps.sdk-cache.outputs.cache-matched-key == ''
+        shell: pwsh
+        working-directory: rexglue-sdk
+        run: |
+          # Stock package (PKG == REF): no patches. Otherwise apply sdk-builds patches/.
+          Get-ChildItem ..\sdk-builds\patches\*.patch -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
+            if ($_.Name -like '*.ffmpeg.patch') {
+              git -C thirdparty/FFmpeg apply --ignore-whitespace --whitespace=nowarn $_.FullName
+            } else {
+              git apply --ignore-whitespace --whitespace=nowarn $_.FullName
+            }
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          cmake --preset win-amd64 `
+            -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ `
+            -DREXGLUE_ENABLE_TRACY=OFF `
+            "-DCMAKE_INSTALL_PREFIX=$env:GITHUB_WORKSPACE/rexglue-sdk-install"
+          cmake --build out/build/win-amd64 --config Release --target install --parallel
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # ---------- Game ----------
+      - name: Compiler cache for generated code
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          variant: sccache
+          key: lode-runner-win-amd64
+
+      - name: Configure game
+        shell: pwsh
+        run: |
+          cmake -S . -B out -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ `
+            "-DCMAKE_C_FLAGS=-march=x86-64-v3" "-DCMAKE_CXX_FLAGS=-march=x86-64-v3" `
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
+            "-DCMAKE_PREFIX_PATH=$env:GITHUB_WORKSPACE/rexglue-sdk-install"
+
+      - name: Build game
+        shell: pwsh
+        run: |
+          cmake --build out --parallel
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Stage package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item out\lode_runner.exe dist\
+          Copy-Item out\lode_runner.map dist\ -ErrorAction SilentlyContinue
+          Get-ChildItem out -Filter *.dll | Copy-Item -Destination dist\
+          Get-ChildItem "$env:GITHUB_WORKSPACE\rexglue-sdk-install\bin" -Filter *.dll -ErrorAction SilentlyContinue |
+            Where-Object { -not (Test-Path ("dist\" + $_.Name)) } | Copy-Item -Destination dist\
+          @"
+          Lode Runner - native Windows build (ReXGlue static recompilation)
+          https://github.com/darkuni/lode-runner-recomp
+
+          Game files are NOT included. You need your own Lode Runner XBLA package
+          (the Xbox 360 LIVE file from your console's storage).
+
+          Setup
+            Put your package file in this folder and run lode_runner.exe. On the first start it makes
+            the "assets" folder from it; after that the package isn't needed any more. The package can be
+            the file on its own or the whole folder copied from the console (58410968\000D0000\...).
+            (Already extracted? Put default.xex, the media folder, etc. in an "assets" folder instead.)
+            If Windows says a DLL (e.g. VCRUNTIME140.dll) is missing, install the Microsoft Visual C++
+            Redistributable 2015-2022 (x64): https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+          F1 / Esc: settings (display mode, resolution, VSync, aspect, filtering, audio buffer, keys). F11: fullscreen.
+          F3: performance overlay. Settings are saved in lode_runner.toml.
+          Controls: left stick / Left Right = steer, RT / Up = accelerate, LT / Down = brake,
+          A B X Y / Z X A S, LB RB / Q W, d-pad / I J K L, Start / Enter, Back / Backspace.
+          Crash reports: crash-*.txt + .dmp next to the exe (lode_runner.map decodes them).
+
+          Unofficial fan project, not affiliated with or endorsed by SEGA, Sumo Digital or Microsoft. The exe
+          contains code machine-translated from the game's executable; game data comes from your own package.
+          ReXGlue SDK: BSD-3-Clause (portions from Xenia) - see licenses\.
+          "@ | Out-File dist\README.txt -Encoding utf8
+          New-Item -ItemType Directory -Force dist\licenses | Out-Null
+          Copy-Item LICENSE dist\licenses\lode-runner-recomp-LICENSE.txt
+          if (Test-Path "$env:GITHUB_WORKSPACE\rexglue-sdk-install\share\licenses") {
+            Copy-Item -Recurse "$env:GITHUB_WORKSPACE\rexglue-sdk-install\share\licenses\*" dist\licenses\
+          }
+          Get-ChildItem dist
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: lode_runner-win-amd64
+          path: dist/
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ inputs.release_tag }}"
+          if (-not $tag) { $tag = "${{ github.ref_name }}" }
+          $zip = "lode_runner-$tag-win-amd64.zip"
+          Compress-Archive -Path dist\* -DestinationPath $zip -Force
+          # A release published from the GitHub page already exists: attach the zip to it.
+          # Otherwise (tag pushed, or release_tag input) create a prerelease as before.
+          gh release view $tag --repo ${{ github.repository }} *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $zip --clobber --repo ${{ github.repository }}
+          } else {
+            gh release create $tag $zip --repo ${{ github.repository }} --target ${{ github.sha }} --prerelease --title "Lode Runner $tag" --notes-file RELEASE_NOTES.md
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
