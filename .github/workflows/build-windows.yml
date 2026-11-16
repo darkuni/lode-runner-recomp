@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build Windows + Linux
 
 on:
   push:
@@ -170,11 +170,11 @@ jobs:
 
           F1 / Esc: settings (display mode, resolution, VSync, aspect, filtering, audio buffer, keys). F11: fullscreen.
           F3: performance overlay. Settings are saved in lode_runner.toml.
-          Controls: left stick / Left Right = steer, RT / Up = accelerate, LT / Down = brake,
-          A B X Y / Z X A S, LB RB / Q W, d-pad / I J K L, Start / Enter, Back / Backspace.
+          Keyboard: arrows = move, Z = dig left (A), X = dig right (B), A / S = X / Y, C / V = triggers,
+          Q / W = bumpers, Enter = Start, Backspace = Back. Controllers work as-is.
           Crash reports: crash-*.txt + .dmp next to the exe (lode_runner.map decodes them).
 
-          Unofficial fan project, not affiliated with or endorsed by SEGA, Sumo Digital or Microsoft. The exe
+          Unofficial fan project, not affiliated with or endorsed by the game's developers, publishers or Microsoft. The exe
           contains code machine-translated from the game's executable; game data comes from your own package.
           ReXGlue SDK: BSD-3-Clause (portions from Xenia) - see licenses\.
           "@ | Out-File dist\README.txt -Encoding utf8
@@ -191,24 +191,152 @@ jobs:
           name: lode_runner-win-amd64
           path: dist/
 
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      # SDL3 is built inside the SDK and picks its video/audio/input backends from the
+      # headers present here; they are loaded at run time, so the game runs on X11 or
+      # Wayland with PipeWire, PulseAudio or ALSA (Steam Deck: Wayland/X11 + PipeWire).
+      - name: Toolchain and SDL backend headers
+        run: |
+          wget -qO llvm.sh https://apt.llvm.org/llvm.sh
+          sudo bash llvm.sh 20
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build \
+            libx11-dev libx11-xcb-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev \
+            libxss-dev libxtst-dev libxkbcommon-dev libwayland-dev wayland-protocols libdecor-0-dev \
+            libegl-dev libgles-dev libdrm-dev libgbm-dev libvulkan-dev \
+            libasound2-dev libpulse-dev libpipewire-0.3-dev libudev-dev libdbus-1-dev libibus-1.0-dev
+          clang++-20 --version
+          cmake --version
+
+      - name: Restore SDK install cache
+        id: sdk-cache
+        uses: actions/cache@v4
+        with:
+          path: rexglue-sdk-install
+          key: rexglue-sdk-${{ env.REXGLUE_SDK_REF }}-linux-amd64-v1
+
+      - name: Checkout ReXGlue SDK
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: rexglue/rexglue-sdk
+          ref: ${{ env.REXGLUE_SDK_REF }}
+          path: rexglue-sdk
+          submodules: recursive
+
+      - name: Build and install SDK
+        if: steps.sdk-cache.outputs.cache-hit != 'true'
+        working-directory: rexglue-sdk
+        run: |
+          cmake --preset linux-amd64 \
+            -DCMAKE_C_COMPILER=clang-20 -DCMAKE_CXX_COMPILER=clang++-20 \
+            -DREXGLUE_ENABLE_TRACY=OFF \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/rexglue-sdk-install
+          cmake --build out/build/linux-amd64 --config Release --target install --parallel
+
+      - name: Compiler cache for generated code
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: lode-runner-linux-amd64
+
+      - name: Configure game
+        run: |
+          cmake -S . -B out -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang-20 -DCMAKE_CXX_COMPILER=clang++-20 \
+            -DCMAKE_C_FLAGS=-march=x86-64-v3 -DCMAKE_CXX_FLAGS=-march=x86-64-v3 \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/rexglue-sdk-install
+
+      - name: Build game
+        run: cmake --build out --parallel
+
+      - name: Stage package
+        run: |
+          d=dist/lode_runner
+          mkdir -p $d/licenses
+          cp out/lode_runner $d/
+          strip --strip-unneeded $d/lode_runner
+          cp out/*.so $d/ 2>/dev/null || true
+          for f in rexglue-sdk-install/lib/librexruntime.so rexglue-sdk-install/lib/librexgpu-xenos.so; do
+            [ -f $d/$(basename $f) ] || cp $f $d/
+          done
+          strip --strip-unneeded $d/*.so
+          chmod +x $d/lode_runner
+          echo "--- libraries the game needs from the system:"
+          (cd $d && LD_LIBRARY_PATH=. ldd ./lode_runner ./*.so | grep -v "=> \./\|:$" | awk '{print $1}' | sort -u)
+          cat > $d/README.txt <<'TXT'
+          Lode Runner - native Linux build (ReXGlue static recompilation), for Steam Deck / SteamOS and desktop Linux
+          https://github.com/darkuni/lode-runner-recomp
+
+          Game files are NOT included. You need your own Lode Runner XBLA package
+          (the Xbox 360 LIVE file from your console's storage).
+
+          Setup
+            Extract this archive, put your package file in the lode_runner folder and run ./lode_runner.
+            On the first start it makes the "assets" folder from it; after that the package isn't needed
+            any more. The package can be the file on its own or the whole folder copied from the console
+            (58410968\000D0000\...). (Already extracted? Put default.xex, the media folder, etc. in an
+            "assets" folder instead.)
+            Steam Deck: in Desktop Mode use "Add a Non-Steam Game" on lode_runner, then play it from
+            Game Mode like any other game.
+            Needs a Vulkan driver (Steam Deck and current Mesa / NVIDIA drivers have one).
+
+          F1 / Esc: settings (display mode, resolution, VSync, aspect, filtering, audio buffer, keys). F11: fullscreen.
+          F3: performance overlay. Settings are saved in lode_runner.toml.
+          Keyboard: arrows = move, Z = dig left (A), X = dig right (B), A / S = X / Y, C / V = triggers,
+          Q / W = bumpers, Enter = Start, Backspace = Back. Controllers work as-is.
+
+          Unofficial fan project, not affiliated with or endorsed by the game's developers, publishers or Microsoft.
+          The program contains code machine-translated from the game's executable; game data comes from your own package.
+          ReXGlue SDK: BSD-3-Clause (portions from Xenia) - see licenses/.
+          TXT
+          cp LICENSE $d/licenses/lode-runner-recomp-LICENSE.txt
+          [ -d rexglue-sdk-install/share/licenses ] && cp -r rexglue-sdk-install/share/licenses/* $d/licenses/ || true
+          # tar keeps the executable bit (a zip from the Actions page would lose it)
+          tar -C dist -czf lode_runner-linux-amd64.tar.gz lode_runner
+          ls -la $d
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: lode_runner-linux-amd64
+          path: lode_runner-linux-amd64.tar.gz
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != '' || github.event_name == 'release'
+    needs: [build, linux]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Download builds
+        uses: actions/download-artifact@v4
+        with:
+          path: builds
+
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
-        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = "${{ inputs.release_tag }}"
-          if (-not $tag) { $tag = "${{ github.ref_name }}" }
-          $zip = "lode_runner-$tag-win-amd64.zip"
-          Compress-Archive -Path dist\* -DestinationPath $zip -Force
-          # A release published from the GitHub page already exists: attach the zip to it.
+          tag="${{ inputs.release_tag }}"
+          [ -n "$tag" ] || tag="${{ github.ref_name }}"
+          (cd builds/lode_runner-win-amd64 && zip -qr ../../lode_runner-$tag-win-amd64.zip .)
+          cp builds/lode_runner-linux-amd64/lode_runner-linux-amd64.tar.gz lode_runner-$tag-linux-amd64.tar.gz
+          files="lode_runner-$tag-win-amd64.zip lode_runner-$tag-linux-amd64.tar.gz"
+          # A release published from the GitHub page already exists: attach the builds to it.
           # Otherwise (tag pushed, or release_tag input) create one; prerelease unless the input says not to.
-          gh release view $tag --repo ${{ github.repository }} *> $null
-          if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag $zip --clobber --repo ${{ github.repository }}
-          } else {
-            $pre = @()
-            if ("${{ inputs.prerelease }}" -ne "false") { $pre = @("--prerelease") }
-            gh release create $tag $zip --repo ${{ github.repository }} --target ${{ github.sha }} @pre --title "Lode Runner $tag" --notes-file RELEASE_NOTES.md
-          }
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if gh release view "$tag" --repo ${{ github.repository }} >/dev/null 2>&1; then
+            gh release upload "$tag" $files --clobber --repo ${{ github.repository }}
+          else
+            pre=""
+            [ "${{ inputs.prerelease }}" = "false" ] || pre="--prerelease"
+            gh release create "$tag" $files --repo ${{ github.repository }} --target ${{ github.sha }} $pre --title "Lode Runner $tag" --notes-file RELEASE_NOTES.md
+          fi

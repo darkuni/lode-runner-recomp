@@ -2,7 +2,7 @@
 
 Static recompilation of **Lode Runner** (Xbox 360 XBLA, Tozai Games / Southend Interactive, 2009;
 Title ID 5841085B, default.xex 0.0.1.2 built 2009-02-24, 6,205,440 bytes, SHA-1 `3d0c8354…`) to native
-Windows with the [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk) v0.9.0. Same treatment as the
+Windows and Linux (Steam Deck / SteamOS) with the [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk) v0.9.0. Same treatment as the
 Poker Smash / After Burner Climax / OutRun recomps.
 
 **No game data is included.** Put your own Lode Runner XBLA package (the LIVE file, or the `5841085B`
@@ -14,9 +14,14 @@ Get the latest `lode_runner-<version>-win-amd64.zip` from [Releases](https://git
 unzip it, put your package next to `lode_runner.exe` and run it. Requirements: 64-bit Windows 10/11 and the
 [Microsoft Visual C++ Redistributable 2015-2022 (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe).
 
+Linux / Steam Deck: get `lode_runner-<version>-linux-amd64.tar.gz`, extract it, put your package in the
+`lode_runner` folder and run `./lode_runner`. On the Deck, add it in Desktop Mode with "Add a Non-Steam Game"
+and play it from Game Mode. Needs a Vulkan driver (the Deck and current Mesa / NVIDIA drivers have one).
+
 ## Building
-GitHub Actions (`.github/workflows/build-windows.yml`) builds on every push to `main` against the prebuilt
-stock SDK from `darkuni/rexglue-sdk-builds`. Run it by hand with `release_tag` set to publish a prerelease.
+GitHub Actions (`.github/workflows/build-windows.yml`) builds Windows and Linux on every push to `main`:
+Windows against the prebuilt stock SDK from `darkuni/rexglue-sdk-builds`, Linux against stock SDK v0.9.0
+built in the job (cached after the first run). Run it by hand with `release_tag` set to publish a prerelease.
 
 ## Codegen
 `lode_runner_manifest.toml` + `lode_runner_overrides.toml` -> `generated/`:
