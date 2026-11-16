@@ -1,0 +1,32 @@
+diff --git a/src/ui/renderdoc_api.cpp b/src/ui/renderdoc_api.cpp
+index ce81e1b..7504d5a 100644
+--- a/src/ui/renderdoc_api.cpp
++++ b/src/ui/renderdoc_api.cpp
+@@ -12,6 +12,10 @@
+ #include <rex/logging.h>
+ #include <rex/ui/renderdoc_api.h>
+ 
++#if !defined(_WIN32)
++#include <dlfcn.h>
++#endif
++
+ namespace rex {
+ namespace ui {
+ 
+@@ -20,6 +24,16 @@ std::unique_ptr<RenderDocAPI> RenderDocAPI::CreateIfConnected() {
+ 
+   pRENDERDOC_GetAPI get_api = nullptr;
+ 
++#if !defined(_WIN32)
++  // Only use RenderDoc if it is already in the process (launched from RenderDoc).
++  // A plain dlopen would load any librenderdoc.so installed on the system,
++  // which starts capturing and draws its overlay over the game.
++  if (void* attached = dlopen(platform::lib_names::kRenderDoc, RTLD_NOW | RTLD_NOLOAD)) {
++    dlclose(attached);
++  } else {
++    return nullptr;
++  }
++#endif
+   // Try to load the RenderDoc library. If RenderDoc is attached, the library
+   // should already be loaded into the process and this will increment the
+   // reference count. If not attached, the load will fail and we return nullptr.

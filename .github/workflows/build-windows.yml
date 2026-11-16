@@ -219,7 +219,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: rexglue-sdk-install
-          key: rexglue-sdk-${{ env.REXGLUE_SDK_REF }}-linux-amd64-v1
+          key: rexglue-sdk-${{ env.REXGLUE_SDK_REF }}-linux-amd64-v2
 
       - name: Checkout ReXGlue SDK
         if: steps.sdk-cache.outputs.cache-hit != 'true'
@@ -234,6 +234,9 @@ jobs:
         if: steps.sdk-cache.outputs.cache-hit != 'true'
         working-directory: rexglue-sdk
         run: |
+          # Use RenderDoc only when launched from it (RTLD_NOLOAD); otherwise an installed
+          # librenderdoc.so gets loaded and draws its "Capturing Vulkan" overlay.
+          git apply --whitespace=nowarn ../tools/sdk-linux-renderdoc-noload.patch
           cmake --preset linux-amd64 \
             -DCMAKE_C_COMPILER=clang-20 -DCMAKE_CXX_COMPILER=clang++-20 \
             -DREXGLUE_ENABLE_TRACY=OFF \
